@@ -1,0 +1,11 @@
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - software-properties-common
+  - python3-pip
+
+packages_pip:
+  - docker
+  - jsondiff
+  - pyyaml

@@ -1,0 +1,101 @@
+version: "3.7"
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379"
+    networks:
+      - frontend
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1 #The number of containers to rollback at a time. If set to 0, all containers rollback simultaneously.
+        delay: 10s #The time to wait between each container group’s rollback (default 0s).
+        order: start-first #Order of operations during rollbacks. New task is started first, and the running tasks briefly overlap
+      rollback_config:
+        parallelism: 1
+        delay: 120s
+        failure_action: continue #What to do if a rollback fails
+        monitor: 60s #Duration after each task update to monitor for failure
+        order: stop-first #Order of operations during rollbacks. Old task is stopped before starting new one
+      restart_policy:
+        condition: on-failure
+
+  db:
+    image: postgres:9.4
+    volumes:
+      - db-data:/var/lib/postgres/data
+    networks:
+      - backend
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    deploy:
+      placement:
+        constraints: [node.role == manager] #This DB will be deployed only on the manager
+
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+    ports:
+      - 5000:80
+    networks:
+      - frontend
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+      restart_policy:
+        condition: on-failure
+
+  result:
+    image: dockersamples/examplevotingapp_result:before
+    ports:
+      - 5001:80
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    networks:
+      - frontend
+      - backend
+    deploy:
+      mode: replicated #If the service is replicated (which is the default), limit the number of replicas that can run on a node at any time.
+      replicas: 1
+      labels: [APP=VOTING]
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == manager]
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    stop_grace_period: 1m30s #Specify how long to wait when attempting to stop a container if it doesn’t handle SIGTERM before sending SIGKILL
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+networks: #networks to be created
+  frontend:
+  backend:
+
+volumes: #volumes to be created
+  db-data:

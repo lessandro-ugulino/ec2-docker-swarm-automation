@@ -1,0 +1,22 @@
+---
+- hosts:
+    - Master
+    - Nodes
+  become: true
+  roles:
+    - docker/common
+
+- hosts: Master
+  become: true
+  roles:
+    - docker/master
+
+- hosts: Nodes
+  become: true
+  roles:
+    - docker/nodes
+
+- hosts: Master
+  become: true
+  roles:
+    - apps/voting

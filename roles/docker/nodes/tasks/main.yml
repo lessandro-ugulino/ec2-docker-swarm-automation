@@ -1,0 +1,13 @@
+- set_fact:
+    token: "{{ hostvars[groups['Master'][0]]['join_token_worker'] }}"
+
+- name: Join node to cluster
+  shell: docker swarm join --token {{ token }} {{ masterEC2PrivateIp }}:2377
+  register: worker
+  ignore_errors: True
+
+- name: Show Results
+  debug: var=worker.stdout
+
+- name: Show Errors
+  debug: var=worker.stderr

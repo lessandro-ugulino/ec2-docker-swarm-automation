@@ -1,0 +1,13 @@
+- name: Convert docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /tmp/docker-compose.yml
+    mode: 0777
+  when: inventory_hostname in groups['Master']
+
+- name: Deploy stack from a compose file
+  docker_stack:
+    state: present
+    name: vote
+    compose:
+      - /tmp/docker-compose.yml
