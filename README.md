@@ -4,16 +4,14 @@ This pipeline is based on this [documentation](https://medium.com/@lessandro.ugu
 
 ## Index
 
-- [Architecture](#Architecture)
-- [Deployment Pipeline](#deploy)
-- [How to Deploy](#howto)
-  - [Update host.yml](#update)
-  - [Update ansible.cfg](#update-ansible)
-  - [Dependencies](#Dependencies)
-  - [Deploy](#Deploy)
-- [Result](#Result)
-
-<a name="Architecture"></a>
+- [Architecture](#architecture)
+- [Deployment Pipeline](#deployment-pipeline)
+- [How to Deploy](#how-to-deploy)
+  - [Update host file](#update-host-file)
+  - [Update ansible config file](#update-ansible-config-file)
+  - [Dependencies](#dependencies)
+  - [Deploy](#deploy)
+- [Result](#result)
 
 ## Architecture
 
@@ -27,23 +25,17 @@ _Docker application that will be deployed via this automation_
 
 ![Arch](img/docker-swarm.png)
 
-<a name="deploy"></a>
-
 ## Deployment Pipeline
 
 ![pipeline](img/pipeline.png)
 
-<a name="howto"></a>
-
 # How to Deploy
 
-<a name="update"></a>
-
-## Update host.yml
+## Update host file
 
 Update the `hosts.yml` (inventory/hosts.yml) file with the EC2 public and private IP addresses.
 
-```hcl
+```yml
 # Update EC2 public and private IP address.
 all:
   vars:
@@ -60,9 +52,7 @@ all:
         13.239.96.246:
 ```
 
-<a name="update-ansible"></a>
-
-## Update ansible.cfg
+## Update ansible config file
 
 For this automation, we're using a `.pem` key to connect to the EC2s, but you can set up it as you wish.
 
@@ -75,16 +65,12 @@ host_key_checking=false
 private_key_file= your_key.pem
 ```
 
-<a name="Dependencies"></a>
-
 ## Dependencies
 
 These tools need to be installed on your local machine or the computer that will run Ansible:
 
 - <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html">AWS Cli</a>
 - <a href="https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-on-macos">Ansible</a>
-
-<a name="Deploy"></a>
 
 ## Deploy
 
@@ -93,8 +79,6 @@ The below command will run the Ansible playbook and deploy the defined tasks on 
 ```
 ansible-playbook deploy_docker_swarm.yml
 ```
-
-<a name="Result"></a>
 
 ## Result
 
